@@ -18,10 +18,9 @@ public class ReverseVowInString {
                end--;
            }
            if(start<end) {
-               String startString = String.valueOf(ans.charAt(start));
-               String endString = String.valueOf(ans.charAt(end));
-               ans.replace(start,start+1,endString);
-               ans.replace(end,end+1,startString);
+               char temp = ans.charAt(start);
+               ans.setCharAt(start, ans.charAt(end));
+               ans.setCharAt(end, temp);
                start++;
                end--;
            }

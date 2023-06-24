@@ -1,7 +1,7 @@
-package Algos;
+package Interviews.MS_Jun2023;
 
 import java.util.*;
-public class MS_Online_Q2 {
+public class OA_Q2 {
 
     //https://www.geeksforgeeks.org/count-of-pairs-a-b-in-range-1-to-n-such-that-last-digit-of-a-is-equal-to-the-first-digit-of-b/
     // Instead of in a range from 1 to n, we want to find the ans from a given arr

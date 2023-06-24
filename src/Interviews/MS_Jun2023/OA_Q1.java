@@ -1,7 +1,7 @@
-package Algos;
+package Interviews.MS_Jun2023;
 
 import java.util.*;
-public class MS_Online_Q1 {
+public class OA_Q1 {
     // https://stackoverflow.com/questions/56000424/algorithm-to-find-shortest-continuous-subarray-that-contains-all-values-from-a-s
     // Instead of values from a set, ints from a range L to R inclusive, are to be found in an array
     static int solution(int[] A, int L, int R) {

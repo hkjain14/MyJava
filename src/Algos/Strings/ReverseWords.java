@@ -1,4 +1,4 @@
-package Algos;
+package Algos.Strings;
 
 public class ReverseWords {
     /*

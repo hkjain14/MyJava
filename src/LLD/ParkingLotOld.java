@@ -3,7 +3,7 @@ package LLD;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ParkingLot {
+public class ParkingLotOld {
 
     public class Parking {
         String add;
@@ -32,24 +32,14 @@ public class ParkingLot {
         }
 
         public void freeVehicle(Vehicle vehicle, double exitingTime) {
-            for(int i=0;i<NUM_FLOORS;i++) {
-                double parkingTime = this.floors[i].freeVehicle(vehicle);
-                if(parkingTime > 0) {
-                    double totalTime = exitingTime-parkingTime;
-                    double cost = totalTime*500;
-                    System.out.println(vehicle.vehicleType+" "+ vehicle.vehicleNumber +" successfully exited. It was parked for "+totalTime*60+" minutes. Cost is "+cost);
-                    return;
-                }
+            if(vehicle.parkedSlot == null) {
+                System.out.println("Vehicle "+vehicle.vehicleType+ " of number "+vehicle.vehicleNumber+ " was not originally parked successfully. Hence no exit.");
             }
-            System.out.println("Vehicle "+vehicle.vehicleType+ " of number "+vehicle.vehicleNumber+ " was not originally parked successfully. Hence no exit.");
-        }
-
-        public void getParkingLocation(Vehicle vehicle) {
-            for(int i=0;i<NUM_FLOORS;i++) {
-                if(this.floors[i].getParkingLocationAtFloor(vehicle)) {
-                    return;
-                }
-            }
+            double parkingTime = vehicle.parkedSlot.getParkingTime();
+            vehicle.parkedSlot.freeVehicle();
+            double totalTime = exitingTime-parkingTime;
+            double cost = totalTime*500;
+            System.out.println(vehicle.vehicleType+" "+ vehicle.vehicleNumber +" successfully exited. It was parked for "+totalTime*60+" minutes. Cost is "+cost);
         }
 
     }
@@ -57,15 +47,13 @@ public class ParkingLot {
     public class Floor {
         int floorNum;
         int numSlots;
-        Map<ParkingLot.VehicleType,Integer> availableSlotsMap;
-        Map<Vehicle, Slot> parkMap;
+        Map<ParkingLotOld.VehicleType,Integer> availableSlotsMap;
         Slot[] slots;
 
         Floor(int f, int n) {
             this.floorNum = f;
             this.numSlots = n;
             this.availableSlotsMap = new HashMap<>();
-            this.parkMap = new HashMap<>();
             availableSlotsMap.put(VehicleType.TRUCK,n/3);
             availableSlotsMap.put(VehicleType.CAR,n/3);
             availableSlotsMap.put(VehicleType.BIKE,n/3);
@@ -81,42 +69,21 @@ public class ParkingLot {
         }
 
         public boolean parkVehicle(Vehicle vehicle, double parkingTime) {
-            ParkingLot.VehicleType vehicleType = vehicle.vehicleType;
+            ParkingLotOld.VehicleType vehicleType = vehicle.vehicleType;
 
             if(getCountAvailableSlots(vehicleType)<=0)
                 return false;
 
             for(int i=0;i<numSlots;i++) {
                 if(slots[i].parkVehicle(vehicle, parkingTime)) {
-                    this.parkMap.put(vehicle,slots[i]);
                     this.availableSlotsMap.put(vehicleType, getCountAvailableSlots(vehicleType)-1);
                     return true;
                 }
             }
-
             return false; // redundant. just for no error since boolean return type
         }
 
-        public double freeVehicle(Vehicle vehicle) {
-            Slot slot = this.parkMap.get(vehicle);
-            if(slot == null)
-                return -1;
-            double parkingTime = slot.parkingTime;
-            this.parkMap.remove(vehicle);
-            slot.freeSlot();
-            this.availableSlotsMap.put(vehicle.vehicleType, getCountAvailableSlots(vehicle.vehicleType)+1);
-            return parkingTime;
-        }
-
-        public boolean getParkingLocationAtFloor(Vehicle vehicle) {
-            Slot slot = this.parkMap.get(vehicle);
-            if(slot == null)
-                return false;
-            System.out.println("Vehicle bearing number "+vehicle.vehicleNumber+ " is parked on floor no "+ this.floorNum+ " at slot "+slot.id);
-            return true;
-        }
-
-        public int getCountAvailableSlots(ParkingLot.VehicleType vehicleType) {return this.availableSlotsMap.get(vehicleType);}
+        public int getCountAvailableSlots(ParkingLotOld.VehicleType vehicleType) {return this.availableSlotsMap.get(vehicleType);}
     }
 
     public class Slot {
@@ -126,6 +93,7 @@ public class ParkingLot {
             EMPTY
         }
 
+        Vehicle parkedVehicle;
         Status status;
         VehicleType slotVehicleType;
         int id;
@@ -141,17 +109,24 @@ public class ParkingLot {
 
         public boolean parkVehicle(Vehicle vehicle, double parkingTime) {
             if(this.slotVehicleType == vehicle.vehicleType && this.status == Status.EMPTY) {
+                this.parkedVehicle = vehicle;
                 this.parkingTime = parkingTime;
                 this.status = Status.OCCUPIED;
+                vehicle.parkedSlot = this;
                 return true;
             }
             return false;
         }
 
-        public void freeSlot() {
+        public void freeVehicle() {
+            this.parkedVehicle.parkedSlot = null;
+            this.parkedVehicle = null;
             this.parkingTime = 0;
             this.status = Status.EMPTY;
         }
+
+        public double getParkingTime() {return this.parkingTime;}
+
     }
 
     public enum VehicleType {
@@ -163,6 +138,7 @@ public class ParkingLot {
     public abstract class Vehicle {
         String vehicleNumber;
         VehicleType vehicleType;
+        Slot parkedSlot;
     }
 
     public class Bike extends Vehicle {
@@ -189,24 +165,19 @@ public class ParkingLot {
 
         Bike b1 = new Bike("123");
         p.parkVehicle(b1,1);
-        p.getParkingLocation(b1);
         p.freeVehicle(b1,2);
-        System.out.println("========================");
 
         Car c1 = new Car("987");
         p.parkVehicle(c1,3);
-        p.getParkingLocation(c1);
         p.freeVehicle(c1,3.5);
-        System.out.println("========================");
 
         Truck t1 = new Truck("456");
         p.parkVehicle(t1,5);
-        p.getParkingLocation(t1);
         p.freeVehicle(t1,7);
     }
 
     public static void main(String[] args) {
-        ParkingLot pl = new ParkingLot();
+        ParkingLotOld pl = new ParkingLotOld();
         pl.driver();
     }
 }

@@ -29,17 +29,19 @@ public class WordSearch {
     static boolean checkWordSearch(char[][] board, String word) {
         int x = board.length;
         int y = board[0].length;
-        boolean [][]visited = new boolean[x][y];
+        boolean [][]visited;
 
         for (int i=0;i<x;i++) {
             for(int j=0;j<y;j++) {
                 if(word.charAt(0) == board[i][j]) {
                     int stringPos = 1;
+                    visited = new boolean[x][y];
+
                     DFS(board,word,i,j, visited, stringPos);
+
                     if(ans) {
                         break;
                     }
-                    visited = new boolean[x][y];
                 }
             }
         }

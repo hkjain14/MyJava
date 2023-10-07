@@ -2,7 +2,7 @@ package DS.Graph.DFS;
 
 public class BiggestIsland {
     static int[][] pos = {{-1,-1},{-1,0},{-1,1},{0,-1},{0,1},{1,-1},{1,0},{1,1}};
-    static int islandSize = 1;
+    static int islandSize;
     static boolean isValidMove(int a, int b, int[][] input) {
         int x = input.length, y=input[0].length;
         return a >= 0 && a < x && b >= 0 && b < y;
@@ -27,9 +27,9 @@ public class BiggestIsland {
         for(int i=0;i<x;i++) {
             for(int j=0;j<y;j++) {
                 if (!visited[i][j] && input[i][j]==1) {
+                    islandSize=1;
                     DFS(input,visited, i, j);
                     ans = Math.max(ans,islandSize);
-                    islandSize=1;
                 }
             }
         }

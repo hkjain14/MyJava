@@ -37,9 +37,11 @@ public class ReverseWords {
     static void reverseWords(StringBuilder sb) {
         int l=0,r=1;
         while(l<sb.length()) {
-            while(r<sb.length() && sb.charAt(r)!=' ')r++;
+            while(r<sb.length() && sb.charAt(r)!=' ')
+                r++;
             reverse(sb,l,r-1);
-            l=r+1;r=l+1;
+            l=r+1;
+            r=l+1;
         }
     }
 

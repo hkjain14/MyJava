@@ -3,8 +3,7 @@ package DS.Graph.DFS;
 public class NumIslands {
     static int[][] pos = {{-1,-1},{-1,0},{-1,1},{0,-1},{0,1},{1,-1},{1,0},{1,1}};
 
-    static boolean isValidMove(int a, int b, int[][] input) {
-        int x = input.length, y=input[0].length;
+    static boolean isValidMove(int a, int b, int x, int y) {
         return a >= 0 && a < x && b >= 0 && b < y;
     }
 
@@ -13,7 +12,7 @@ public class NumIslands {
         for(int i=0;i<pos.length;i++) {
             int newX = x+pos[i][0];
             int newY = y+pos[i][1];
-            if(isValidMove(newX,newY,input) && input[newX][newY]==1 && !visited[newX][newY]) {
+            if(isValidMove(newX,newY,input.length, input[0].length) && input[newX][newY]==1 && !visited[newX][newY]) {
                 DFS(input,visited,newX,newY);
             }
         }

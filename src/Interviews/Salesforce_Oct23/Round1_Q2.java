@@ -2,7 +2,8 @@ package Interviews.Salesforce_Oct23;
 
 import java.util.*;
 
-public class Round1 {
+public class Round1_Q2 {
+    // Round1 Q1
     public static class Point {
         int xCoord;
         int yCoord;

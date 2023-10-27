@@ -3,7 +3,9 @@ package Interviews.Salesforce_Oct23;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 
-public class Round2 {
+public class Round2_Q1 {
+    // https://www.baeldung.com/java-stream-integers-median-using-heap
+    // Q2 : LLD of UNO
     static PriorityQueue<Integer> minHeap;
     static PriorityQueue<Integer> maxHeap;
 

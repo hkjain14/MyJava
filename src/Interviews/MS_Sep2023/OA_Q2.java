@@ -5,29 +5,33 @@ import java.util.*;
 public class OA_Q2 {
 
     public static int solution(int[] T) {
-        int ans = 0,pos=0,iterations=0,m=1000000000;
-        List<Integer> list = new ArrayList<>(T.length);
+        int iterations = 0, position = 0;
+        List<Integer> inputArrayList = new ArrayList<>();
         for (int j : T)
-            list.add(j);
+            inputArrayList.add(j);
 
-        while(!list.isEmpty()) {
+        int totalTime = 0;
+        int modulo = 1000000000;
+
+        while(!inputArrayList.isEmpty()) {
+            int presentElement = inputArrayList.get(position);
             iterations++;
-            int currValue = list.get(pos);
-            if(currValue == 1) {
-               ans = (ans%m + iterations%m)%m;
-               list.remove(pos);
+
+            if(presentElement == 1) {
+               inputArrayList.remove(position);
+               totalTime = (totalTime % modulo + iterations % modulo) % modulo;
             } else {
-                list.set(pos,currValue-1);
-                pos++;
+                position++;
+                inputArrayList.set(position - 1, presentElement - 1);
             }
-            if(pos == list.size())
-                pos=0;
+            if(inputArrayList.size() == position)
+                position=0;
         }
-        return ans;
+        return totalTime;
     }
 
     public static void main(String[] args) {
-        int[] T = {7,7,7};
+        int[] T = {3,1,2};
         System.out.println(solution(T));
     }
 }

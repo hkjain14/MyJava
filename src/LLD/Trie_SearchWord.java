@@ -51,6 +51,6 @@ public class Trie_SearchWord {
         dic.add("abc");
         dic.add("abcd");
 
-        System.out.println(dic.search("...."));
+        System.out.println(dic.search(".b."));
     }
 }

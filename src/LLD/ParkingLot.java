@@ -83,8 +83,10 @@ public class ParkingLot {
         public boolean parkVehicle(Vehicle vehicle, double parkingTime) {
             ParkingLot.VehicleType vehicleType = vehicle.vehicleType;
 
-            if(getCountAvailableSlots(vehicleType)<=0)
+            if(getCountAvailableSlots(vehicleType)<=0) {
+                System.out.println("Parking full for " + vehicleType + "on floor number " + this.floorNum);
                 return false;
+            }
 
             for(int i=0;i<numSlots;i++) {
                 if(slots[i].parkVehicle(vehicle, parkingTime)) {
@@ -94,7 +96,7 @@ public class ParkingLot {
                 }
             }
 
-            return false; // redundant. just for no error since boolean return type
+            return false;
         }
 
         public double freeVehicle(Vehicle vehicle) {
@@ -190,6 +192,11 @@ public class ParkingLot {
         Bike b1 = new Bike("123");
         p.parkVehicle(b1,1);
         p.getParkingLocation(b1);
+        Bike b2 = new Bike("456");
+        System.out.println("========================");
+        p.parkVehicle(b2,10);
+        p.getParkingLocation(b2);
+        System.out.println("========================");
         p.freeVehicle(b1,2);
         System.out.println("========================");
 

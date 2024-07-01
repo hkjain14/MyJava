@@ -41,7 +41,6 @@ public class NumIslands {
                 {0, 1, 0, 0, 0},
                 {1, 0, 1, 0, 1}
         };
-        int numIslands = getNumIslands(input);
-        System.out.println(numIslands);
+        System.out.println(getNumIslands(input));
     }
 }

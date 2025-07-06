@@ -201,6 +201,7 @@ public class Solution {
 
         return dp[n].segments;
     }
+  }
 
   public static void main(String[] args) {
         List<String> testCases = Arrays.asList(

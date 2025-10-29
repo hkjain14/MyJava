@@ -21,7 +21,7 @@ output: 55
 */
 import java.util.*;
 
-public class Solution {
+public class OA_Q1 {
     public static long optimizeCalorieBurn(List<Integer> height) {
         Collections.sort(height);
         int size = height.size();

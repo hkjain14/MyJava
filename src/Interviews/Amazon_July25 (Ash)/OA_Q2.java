@@ -28,7 +28,7 @@ so ans = 1
 */
 
 import java.util.*;
-public class Solution {
+public class OA_Q2 {
 
 
   // Approach 1: DP only(no segment trees): O(n^2) time

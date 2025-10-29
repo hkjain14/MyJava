@@ -1,3 +1,4 @@
+/*
 You are receiving 2D GPS coordinates in a plane from some service and your task is to write a program that detects if a
 given point can create a square with any 3 previously seen points.
 
@@ -84,3 +85,4 @@ x2,y1
 x2,y2
 
 
+*/

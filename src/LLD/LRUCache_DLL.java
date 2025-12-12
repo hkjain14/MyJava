@@ -7,7 +7,6 @@ public class LRUCache_DLL {
     int capacity;
     Node dummyHead;
     Node dummyTail;
-
     Map<Integer, Node> map;
 
     class Node {
@@ -39,15 +38,18 @@ public class LRUCache_DLL {
         dummyTail.prev = node;
     }
 
+    // Using DLL because this cant be done in O(1) in LL: at time of updation of existing node (get/put(if already present))
     void removeNode(Node node) {
         node.prev.next = node.next;
         node.next.prev = node.prev;
+        node.prev = node.next = null;
     }
 
+    // Done in O(1)
     void put(int key, int val) {
         // If already present key
         if(map.containsKey(key)) {
-            // Remove from map : automatic at line 57 bcoz HashMap has unique value per key.
+            // Update map value: done at 57
             // Remove from LL
             removeNode(map.get(key));
         }
@@ -56,14 +58,15 @@ public class LRUCache_DLL {
         addToEnd(node);
         map.put(key,node);
         if(map.size() > capacity) {
-            // Remove it from Map
+            // Remove top from Map
             map.remove(dummyHead.next.key);
 
-            // Remove actual head from LL
+            // Remove top (actual head) from LL
             removeNode(dummyHead.next);
         }
     }
 
+    // Done in O(1)
     int get(int key) {
         if(!map.containsKey(key)) {
             return -1;
@@ -76,10 +79,8 @@ public class LRUCache_DLL {
 
     void printCache() {
         Node start = dummyHead.next;
-        while(true) {
-            if(start == dummyTail)
-                break;
-            System.out.printf(start.val+ " ");
+        while(start != dummyTail) {
+            System.out.printf(start.key + ":" + start.val+ " ");
             start = start.next;
         }
         System.out.println();

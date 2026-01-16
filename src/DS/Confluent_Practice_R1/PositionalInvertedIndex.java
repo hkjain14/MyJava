@@ -31,18 +31,17 @@ public class PositionalInvertedIndex {
         }
     }
 
-    /** Word search: return sorted list of docIds that contain the token (case-insensitive) */
+    /** Word search: return list of docIds that contain the token (case-insensitive) */
     public List<Integer> queryWord(String word) {
         if (word == null || word.isEmpty()) return Collections.emptyList();
         String token = word.toLowerCase(Locale.ROOT);
         Map<Integer, List<Integer>> posting = index.get(token);
         if (posting == null) return Collections.emptyList();
-        List<Integer> res = new ArrayList<>(posting.keySet()); // VIMP: KeySet of the map returned
-        return res;
+        return new ArrayList<>(posting.keySet()); // VIMP: KeySet of the map returned;
     }
 
     /**
-     * Phrase search: return sorted list of docIds that contain the exact phrase (case-insensitive),
+     * Phrase search: return list of docIds that contain the exact phrase (case-insensitive),
      * tokens must be consecutive and in the same order.
      */
     public List<Integer> queryPhrase(String phrase) {
@@ -116,7 +115,6 @@ public class PositionalInvertedIndex {
             if (found) result.add(docId);
         }
 
-        Collections.sort(result);
         return result;
     }
 

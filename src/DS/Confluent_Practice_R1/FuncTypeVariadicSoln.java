@@ -1,6 +1,15 @@
 package DS.Confluent_Practice_R1;
 import java.util.*;
 
+/**
+ Time complexity (of 1 query): O(k*m)
+ k = no of funcs
+ m = no of parameters in a query
+
+ Space complexity: O(x)
+ x = totoal number of params in all funcs
+ */
+
 public class FuncTypeVariadicSoln {
 
     static class Func {
@@ -96,10 +105,10 @@ public class FuncTypeVariadicSoln {
     public static void main(String[] args) {
         // Your example functions:
         Func funA = new Func("funA", List.of("int", "bool"), true);
-        Func funC = new Func("funC", List.of("int", "int"), false);
         Func funB = new Func("funB", List.of("int", "int", "int"), true);
+        Func funC = new Func("funC", List.of("int", "int"), false);
 
-        List<Func> funcs = List.of(funA, funC, funB);
+        List<Func> funcs = List.of(funA, funB, funC);
 
         List<String> q1 = List.of("int", "int");
         List<String> q2 = List.of("int", "int", "int", "int");
@@ -109,7 +118,7 @@ public class FuncTypeVariadicSoln {
         System.out.println("Stored functions:");
         funcs.forEach(f -> System.out.println("  " + f));
 
-        System.out.println("\nQuery " + q1 + " => " + findMatches(funcs, q1)); // funC, funB
+        System.out.println("\nQuery " + q1 + " => " + findMatches(funcs, q1)); // funB, funC
         System.out.println("Query " + q2 + " => " + findMatches(funcs, q2)); // funB
         System.out.println("Query " + q3 + " => " + findMatches(funcs, q3)); // funA
         System.out.println("Query " + q4 + " => " + findMatches(funcs, q4)); // funA

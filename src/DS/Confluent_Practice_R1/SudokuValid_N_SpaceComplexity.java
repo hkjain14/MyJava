@@ -5,6 +5,8 @@ package DS.Confluent_Practice_R1;
 public class SudokuValid_N_SpaceComplexity {
     public static boolean isValidSudoku(char[][] board) {
         int N = 9;
+        // Store 9 bit integer at each position of the array ->
+        // the bit's x position's value corresponds to whether x value was set as 1 already for that index.
         int[] rows = new int[N];
         int[] cols = new int[N];
         int[] boxes = new int[N];
@@ -17,13 +19,13 @@ public class SudokuValid_N_SpaceComplexity {
                 }
                 int pos = value - '1';
 
-                // Check if bit is set
-                // x & (1<<i)
+                // Check if in no x, the pos'th bit is set
+                // x & (1<<pos)
                 if((rows[i] & (1 << pos)) != 0) {
                     return false;
                 }
                 // Set bit to 1
-                // x = x | (1<<i)
+                // x = x | (1<<pos)
                 rows[i] = rows[i] | (1 << pos);
 
                 if((cols[j] & (1 << pos)) != 0) {
@@ -42,7 +44,7 @@ public class SudokuValid_N_SpaceComplexity {
     }
     public static void main(String[] args) {
         char [][] board1 =
-                {{'5','3','.','.','7','.','.','.','.'}
+                        {{'5','3','.','.','7','.','.','.','.'}
                         ,{'6','.','.','1','9','5','.','.','.'}
                         ,{'.','9','8','.','.','.','.','6','.'}
                         ,{'8','.','.','.','6','.','.','.','3'}
@@ -53,7 +55,7 @@ public class SudokuValid_N_SpaceComplexity {
                         ,{'.','.','.','.','8','.','.','7','9'}};
 
         char [][] board2 =
-                {{'8','3','.','.','7','.','.','.','.'}
+                        {{'8','3','.','.','7','.','.','.','.'}
                         ,{'6','.','.','1','9','5','.','.','.'}
                         ,{'.','9','8','.','.','.','.','6','.'}
                         ,{'8','.','.','.','6','.','.','.','3'}
@@ -63,7 +65,7 @@ public class SudokuValid_N_SpaceComplexity {
                         ,{'.','.','.','4','1','9','.','.','5'}
                         ,{'.','.','.','.','8','.','.','7','9'}};
 
-        System.out.println(isValidSudoku(board1));
-        System.out.println(isValidSudoku(board2));
+        System.out.println(isValidSudoku(board1)); // true
+        System.out.println(isValidSudoku(board2)); // false (8 twice in col 1)
     }
 }

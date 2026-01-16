@@ -2,24 +2,29 @@ package DS.Confluent_Practice_R1;;
 import java.util.*;
 
 /**
- * Time-windowed key-value store with TTL (sliding window) and O(1) get/getAverage (amortized).
- *
- * Assumptions:
- * - Timestamps provided to operations are non-decreasing (incoming stream is ordered by time).
- * - Values are long (use double if fractional average needed).
+ * Time-windowed KV store with TTL (sliding window).
+ * Timestamps provided to operations are non-decreasing (incoming stream is ordered by time).
  *
  * Methods:
- * - put(key, value, timestamp)
- * - get(key, timestamp) -> long (or -1 if not present / expired)
- * - getAverage(timestamp) -> double (0.0 if no active entries)
+ * - put(key, value, timestamp) : O(1)
+ * - get(key, timestamp) : O(1)
+ * - getAverage(timestamp) : O(1)
+ *
+ * Note: LinkedHashMap solves this already in Java
  */
+
+/**
+ * For concurrent requests, requirement is for a strongly (or eventually) consistent system,
+ *
+ * Soln:
+ */
+
 public class CacheTimeEviction {
     private final Map<String, Node> map;
-    private Node head; // oldest
-    private Node tail; // newest
+    private Node head, tail; // oldest at head, latest at tail
     private long runningSum; // sum of active values
     private int runningCount; // count of active entries
-    private final long windowSec; // window length in seconds (or same time units as timestamps)
+    private final long windowSec; // window length in seconds
 
     private static class Node {
         final String key;
@@ -37,8 +42,7 @@ public class CacheTimeEviction {
     public CacheTimeEviction(long windowSec) {
         this.windowSec = windowSec;
         this.map = new HashMap<>();
-        this.head = null;
-        this.tail = null;
+        this.head = this.tail = null;
         this.runningSum = 0L;
         this.runningCount = 0;
     }
@@ -83,10 +87,9 @@ public class CacheTimeEviction {
         if (existing != null) {
             // existing entry is active (because we evicted expired ones)
             // update running sum, timestamp, value, and move to tail (newest)
-            runningSum -= existing.value;
+            runningSum += value - existing.value;
             existing.value = value;
             existing.timestamp = timestamp;
-            runningSum += value;
 
             // move node to tail (newest)
             removeNode(existing);

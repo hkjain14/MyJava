@@ -2,6 +2,15 @@ package DS.Confluent_Practice_R1;
 import java.util.*;
 
 /**
+Time complexity (of 1 query): O(k*m)
+k = no of funcs
+m = no of parameters in a query
+
+Space complexity: O(x)
+x = totoal number of params in all funcs
+ */
+
+/**
  * Phase 1: exact matching only (no variadic support).
  */
 public class FuncTypeSoln {

@@ -51,13 +51,13 @@ public class SudokuSolver {
 
     void backtrack(int row, int col) {
         if (board[row][col] == '.') {
-            for(int i = 1; i<=N;i++) {
-                if (couldPlace(i,row,col)) {
-                    addNumber(i,row,col);
+            for(int value = 1; value<=N;value++) {
+                if (couldPlace(value,row,col)) {
+                    addNumber(value,row,col);
                     placeNextNumbers(row,col);
 
                     if(!isSolved) {
-                        removeNumber(i,row,col);
+                        removeNumber(value,row,col);
                     }
                 }
             }
@@ -102,6 +102,5 @@ public class SudokuSolver {
                         ,{'.','.','.','.','8','.','.','7','9'}};
         SudokuSolver sudokuSolver = new SudokuSolver();
         sudokuSolver.solveSudoku(board1);
-
     }
 }

@@ -27,7 +27,6 @@ public class SudokuValid_N2_SpaceComplexity {
                 cols[j][pos] = 1;
 
                 int boxIndex = (i/3)*3 + j/3;
-
                 if(boxes[boxIndex][pos] == 1) {
                     return false;
                 }

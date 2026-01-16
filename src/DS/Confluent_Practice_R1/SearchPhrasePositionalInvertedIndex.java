@@ -1,16 +1,32 @@
 package DS.Confluent_Practice_R1;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
-public class PositionalInvertedIndex {
+/**
+ * Time complexity:
+ * Indexing: O(D*L)
+ * D = no of docs
+ * L = avg length of a doc
+ *
+ * Word Querying: O(1)
+ *
+ *
+ * Phrase Querying: Fetching postings + Candidate Doc Intersection cost + y
+ * y = For each candidate doc d, we iterate positions of base token P_base(d) and check k-1 contains() operations on sets for subsequent tokens. So per doc cost ~ O(P_base(d) * (k-1)).
+ * = O(k + cost_intersection + Σ_d P_base(d) * (k-1))
+ *
+ * Space complexity: O(sum of all postings)
+ * sum of all postings = sum over tokens of number of (docId, positions)
+ */
+
+public class SearchPhrasePositionalInvertedIndex {
     public static class Document {
         public final int docId;
         public final String text;
         public Document(int docId, String text) { this.docId = docId; this.text = text; }
     }
 
-    // token -> (docId -> list of positions)
+    // token -> (docId -> list of positions where this token appears in that doc)
     private final Map<String, Map<Integer, List<Integer>>> index = new HashMap<>();
 
     // Build index from docs. Positions are 0-based token indices within each document.
@@ -24,6 +40,12 @@ public class PositionalInvertedIndex {
                 if (t.isEmpty()) continue;
                 String token = t.toLowerCase(Locale.ROOT);
                 Map<Integer, List<Integer>> posting = index.computeIfAbsent(token, k -> new HashMap<>());
+                /* Above line is same as:
+                if (!index.containsKey(token)) {
+                    index.put(token, new HashMap<>());
+                }
+                Map<Integer, List<Integer>> posting = index.get(token);
+                 */
                 List<Integer> positions = posting.computeIfAbsent(d.docId, k -> new ArrayList<>());
                 positions.add(pos);
                 pos++;
@@ -48,25 +70,25 @@ public class PositionalInvertedIndex {
         if (phrase == null || phrase.isEmpty()) return Collections.emptyList();
         // Tokenize the phrase using same tokenizer as buildIndex
         String[] raw = phrase.split("[^\\p{L}\\p{N}]+");
-        List<String> tokens = new ArrayList<>();
+        List<String> queryTokens = new ArrayList<>();
         for (String t : raw) {
             if (t.isEmpty()) continue;
-            tokens.add(t.toLowerCase(Locale.ROOT));
+            queryTokens.add(t.toLowerCase(Locale.ROOT));
         }
-        if (tokens.isEmpty()) return Collections.emptyList();
-        if (tokens.size() == 1) {
-            return queryWord(tokens.get(0));
+        if (queryTokens.isEmpty()) return Collections.emptyList();
+        if (queryTokens.size() == 1) {
+            return queryWord(queryTokens.get(0));
         }
 
-        // Get posting maps for each token; if any token missing, phrase not present anywhere.
+        // Get posting maps for each query token; if any token missing, phrase not present anywhere.
         List<Map<Integer, List<Integer>>> postings = new ArrayList<>();
-        for (String tok : tokens) {
+        for (String tok : queryTokens) {
             Map<Integer, List<Integer>> p = index.get(tok);
             if (p == null) return Collections.emptyList(); // missing token => empty result
             postings.add(p);
         }
 
-        // Find candidate docIds = intersection of docId sets across tokens.
+        // Find candidate docIds, which are the intersection of docId sets across tokens.
         // Start from the smallest posting (optimization).
         int bestIdx = 0;
         int bestSize = postings.get(0).size();
@@ -79,6 +101,7 @@ public class PositionalInvertedIndex {
         for (int i = 0; i < postings.size(); ++i) {
             if (i == bestIdx) continue;
             candidateDocs.retainAll(postings.get(i).keySet());
+            // Break out if candidateDocs (ie intersection) now becomes empty.
             if (candidateDocs.isEmpty()) return Collections.emptyList();
         }
 
@@ -92,7 +115,7 @@ public class PositionalInvertedIndex {
             if (firstPositions == null) continue; // defensive
             // Build sets for tokens 1..k-1 for fast contains checks
             List<Set<Integer>> posSets = new ArrayList<>();
-            for (int t = 1; t < tokens.size(); ++t) {
+            for (int t = 1; t < queryTokens.size(); ++t) {
                 List<Integer> ps = postings.get(t).get(docId);
                 // defensive check
                 if (ps == null) { posSets = null; break; }
@@ -118,7 +141,6 @@ public class PositionalInvertedIndex {
         return result;
     }
 
-    // --- simple demo
     public static void main(String[] args) {
         List<Document> docs = Arrays.asList(
                 new Document(1, "The quick brown fox jumps over the lazy dog."),
@@ -127,7 +149,7 @@ public class PositionalInvertedIndex {
                 new Document(4, "Quick brown foxes are not the same as quick brown fox.")
         );
 
-        PositionalInvertedIndex idx = new PositionalInvertedIndex();
+        SearchPhrasePositionalInvertedIndex idx = new SearchPhrasePositionalInvertedIndex();
         idx.buildIndex(docs);
 
         System.out.println("Word search 'quick' -> " + idx.queryWord("quick"));
@@ -135,6 +157,6 @@ public class PositionalInvertedIndex {
         System.out.println("Phrase search 'quick brown' -> " + idx.queryPhrase("quick brown"));
         System.out.println("Phrase search 'quick brown fox' -> " + idx.queryPhrase("quick brown fox"));
         System.out.println("Phrase search 'brown fox jumps' -> " + idx.queryPhrase("brown fox jumps"));
-        System.out.println("Phrase search 'quick fox' -> " + idx.queryPhrase("quick fox")); // not consecutive
+        System.out.println("Phrase search 'quick fox' -> " + idx.queryPhrase("quick fox"));
     }
 }

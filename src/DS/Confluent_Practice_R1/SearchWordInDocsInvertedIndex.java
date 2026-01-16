@@ -2,6 +2,19 @@ package DS.Confluent_Practice_R1;
 
 import java.util.*;
 
+/**
+ * Time complexity:
+ * Indexing: O(D*L)
+ * D = no of docs
+ * L = avg length of a doc
+ *
+ * Querying: O(1)
+ *
+ * Space complexity: O(V + postings)
+ * V = no of unique tokens
+ * postings = no of (token,docid) pairs stored
+ */
+
 public class SearchWordInDocsInvertedIndex {
     public static class Document {
         public final int docId;
@@ -9,6 +22,7 @@ public class SearchWordInDocsInvertedIndex {
         public Document(int docId, String text) { this.docId = docId; this.text = text; }
     }
 
+    // token -> {d1, d3}
     private final Map<String, Set<Integer>> index = new HashMap<>();
 
     /**
@@ -19,8 +33,9 @@ public class SearchWordInDocsInvertedIndex {
         index.clear();
         for (Document d : docs) {
             if (d.text == null) continue;
-            // split on any sequence that's not a letter/digit (keeps unicode letters/digits)
-            String[] tokens = d.text.split("[^\\p{L}\\p{N}]+");
+            // For keeping unicode chars (and non-Eng chars): "[^\\p{L}\\p{N}]+"
+            String regex = "[^A-Za-z0-9]+";
+            String[] tokens = d.text.split(regex);
             // Use a set to avoid adding same doc id for repeated tokens in same doc
             Set<String> seen = new HashSet<>();
             for (String t : tokens) {
@@ -43,6 +58,7 @@ public class SearchWordInDocsInvertedIndex {
      */
     public List<Integer> query(String word) {
         if (word == null || word.isEmpty()) return Collections.emptyList();
+
         Set<Integer> docSet = index.get(word.toLowerCase());
         if (docSet == null) return Collections.emptyList();
         return new ArrayList<>(docSet);

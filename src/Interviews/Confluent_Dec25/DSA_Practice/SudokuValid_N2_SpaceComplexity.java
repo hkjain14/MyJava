@@ -1,4 +1,4 @@
-package DS.Confluent_Practice_R1;
+package Interviews.Confluent_Dec25.DSA_Practice;
 // leetcode.com/problems/valid-sudoku
 // Time: O(N^2), Space: O(N^2)  where N=number of rows = number of cols
 

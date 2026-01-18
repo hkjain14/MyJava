@@ -1,4 +1,4 @@
-package DS.Confluent_Practice_R1;
+package Interviews.Confluent_Dec25.DSA_Practice;
 
 import java.util.*;
 

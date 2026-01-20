@@ -9,9 +9,12 @@ public class QuickSort {
     }
 
     private static void quickSortRecursion(int[] arr, int low, int high) {
-        if (low >= high) return;
-        // int pivotIndex = partitionRandom(arr, low, high);
-        int pivotIndex = medianOfThree(arr, low, high);
+        if (low >= high)
+            return;
+
+        int pivotIndex = partitionRandom(arr, low, high);
+//      int pivotIndex = medianOfThree(arr, low, high);
+
         quickSortRecursion(arr, low, pivotIndex - 1);
         quickSortRecursion(arr, pivotIndex + 1, high);
     }
@@ -34,8 +37,8 @@ public class QuickSort {
 
     // Optimisation 1: Random partitioning. Worst case O(n*n) -> less probable.
     private static int partitionRandom(int[] arr, int low, int high) {
-        Random rand = new Random();
-        int pivotIndex = low + rand.nextInt(high - low + 1);
+        int pivotIndex = low + new Random().nextInt(high - low + 1);
+
         swap(arr, pivotIndex, high); // move random pivot to end
         return partition(arr, low, high);
     }

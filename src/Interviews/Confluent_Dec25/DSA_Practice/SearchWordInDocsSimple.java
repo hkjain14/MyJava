@@ -27,27 +27,25 @@ public class SearchWordInDocsSimple {
     }
 
     private static boolean bruteSolver(String word, String text) {
-        if (word == null || text == null) return false;
+        if (word == null || text == null)
+            return false;
 
         String target = word.toLowerCase();
         String searchSpace = text.toLowerCase();
-        int n = searchSpace.length();
         StringBuilder current = new StringBuilder();
 
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < searchSpace.length(); i++) {
             char c = searchSpace.charAt(i);
 
             // word characters: letter or digit
             if (Character.isLetterOrDigit(c)) {
-                current.append(Character.toLowerCase(c));
-            } else {
+                current.append(c);
+            } else if (!current.isEmpty()) {
                 // non-word boundary reached → check accumulated word
-                if (!current.isEmpty()) {
-                    if (current.toString().equals(target)) {
-                        return true;
-                    }
-                    current.setLength(0);
+                if (current.toString().equals(target)) {
+                    return true;
                 }
+                current.setLength(0);
             }
         }
 
@@ -62,14 +60,13 @@ public class SearchWordInDocsSimple {
 
     /** Find all document ids that contain the given word (case-insensitive, whole word match). */
     public static List<Integer> findDocumentsContainingWord(String word, List<Document> docs) {
-        if (word == null || word.isEmpty()) return Collections.emptyList();
         List<Integer> result = new ArrayList<>();
-        for (Document d : docs) {
-            if (d.text == null) continue;
+        if (word == null || word.isEmpty())
+            return result;
 
-            if (bruteSolver(word, d.text)) {
+        for (Document d : docs) {
+            if (bruteSolver(word, d.text))
                 result.add(d.docId);
-            }
         }
         return result;
     }

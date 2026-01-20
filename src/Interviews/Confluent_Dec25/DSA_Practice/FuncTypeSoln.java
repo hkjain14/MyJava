@@ -7,14 +7,11 @@ k = no of funcs
 m = no of parameters in a query
 
 Space complexity: O(x)
-x = totoal number of params in all funcs
+x = total number of params in all funcs
  */
 
-/**
- * Phase 1: exact matching only (no variadic support).
- */
 public class FuncTypeSoln {
-    static class Func {
+    public static class Func {
         final String name;
         final List<String> params; // exact ordered parameter types
 
@@ -24,10 +21,14 @@ public class FuncTypeSoln {
         }
 
         boolean matches(List<String> query) {
-            if (query == null) query = Collections.emptyList();
-            if (query.size() != params.size()) return false;
+            if (query == null)
+                query = new ArrayList<>();
+            if (query.size() != params.size())
+                return false;
+
             for (int i = 0; i < params.size(); i++) {
-                if (!params.get(i).equals(query.get(i))) return false;
+                if (!params.get(i).equals(query.get(i)))
+                    return false;
             }
             return true;
         }
@@ -36,7 +37,8 @@ public class FuncTypeSoln {
     public static List<String> findMatches(List<Func> funcs, List<String> query) {
         List<String> res = new ArrayList<>();
         for (Func f : funcs) {
-            if (f.matches(query)) res.add(f.name);
+            if (f.matches(query))
+                res.add(f.name);
         }
         return res;
     }

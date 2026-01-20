@@ -11,26 +11,35 @@ public class SudokuValid_N2_SpaceComplexity {
 
         for (int i=0;i<N;i++) {
             for (int j=0;j<N;j++) {
-                char value = board[i][j];
-                if ( value == '.') {
+                char charValue = board[i][j];
+                if (charValue == '.')
                     continue;
-                }
-                int pos = value - '1';
-                if(rows[i][pos] == 1) {
-                    return false;
-                }
-                rows[i][pos] = 1;
 
-                if(cols[j][pos] == 1) {
+                int intValue = charValue - '1';
+
+                if(intValue<0 || intValue >8) {
+                    System.out.println("Invalid number " + (intValue+1) + " in Sudoku at row: " + (i+1) + " and col: " + (j+1));
                     return false;
                 }
-                cols[j][pos] = 1;
+
+                if(rows[i][intValue] == 1) {
+                    System.out.println("Duplicate number " + (intValue+1) + " in Sudoku at row: " + (i+1) + " and col: " + (j+1));
+                    return false;
+                }
+                rows[i][intValue] = 1;
+
+                if(cols[j][intValue] == 1) {
+                    System.out.println("Duplicate number " + (intValue+1) + " in Sudoku at row: " + (i+1) + " and col: " + (j+1));
+                    return false;
+                }
+                cols[j][intValue] = 1;
 
                 int boxIndex = (i/3)*3 + j/3;
-                if(boxes[boxIndex][pos] == 1) {
+                if(boxes[boxIndex][intValue] == 1) {
+                    System.out.println("Duplicate number " + (intValue+1) + " in Sudoku at row: " + (i+1) + " and col: " + (j+1));
                     return false;
                 }
-                boxes[boxIndex][pos] = 1;
+                boxes[boxIndex][intValue] = 1;
             }
         }
         return true;
@@ -49,7 +58,7 @@ public class SudokuValid_N2_SpaceComplexity {
                         ,{'.','.','.','.','8','.','.','7','9'}};
 
         char [][] board2 =
-                        {{'8','3','.','.','7','.','.','.','.'}
+                        {{'0','3','.','.','7','.','.','.','.'}
                         ,{'6','.','.','1','9','5','.','.','.'}
                         ,{'.','9','8','.','.','.','.','6','.'}
                         ,{'8','.','.','.','6','.','.','.','3'}
@@ -59,7 +68,19 @@ public class SudokuValid_N2_SpaceComplexity {
                         ,{'.','.','.','4','1','9','.','.','5'}
                         ,{'.','.','.','.','8','.','.','7','9'}};
 
-        System.out.println(isValidSudoku(board1));
-        System.out.println(isValidSudoku(board2));
+        char [][] board3 =
+                        {{'7','3','.','.','7','.','.','.','.'}
+                        ,{'6','.','.','1','9','5','.','.','.'}
+                        ,{'.','9','8','.','.','.','.','6','.'}
+                        ,{'8','.','.','.','6','.','.','.','3'}
+                        ,{'4','.','.','8','.','3','.','.','1'}
+                        ,{'7','.','.','.','2','.','.','.','6'}
+                        ,{'.','6','.','.','.','.','2','8','.'}
+                        ,{'.','.','.','4','1','9','.','.','5'}
+                        ,{'.','.','.','.','8','.','.','7','9'}};
+
+        System.out.println(isValidSudoku(board1) + "\n");
+        System.out.println(isValidSudoku(board2) + "\n");
+        System.out.println(isValidSudoku(board3) + "\n");
     }
 }

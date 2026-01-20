@@ -13,31 +13,39 @@ public class SudokuValid_N_SpaceComplexity {
 
         for(int i=0;i<N;i++) {
             for (int j=0;j<N;j++) {
-                char value = board[i][j];
-                if(value == '.') {
+                char charValue = board[i][j];
+                if(charValue == '.') {
                     continue;
                 }
-                int pos = value - '1';
+                int intValue = charValue - '1';
 
-                // Check if in no x, the pos'th bit is set
-                // x & (1<<pos)
-                if((rows[i] & (1 << pos)) != 0) {
+                if(intValue<0 || intValue >8) {
+                    System.out.println("Invalid number " + (intValue+1) + " in Sudoku at row: " + (i+1) + " and col: " + (j+1));
+                    return false;
+                }
+
+                // Check if in no x, the intValue'th bit is set
+                // x & (1<<intValue)
+                if((rows[i] & (1 << intValue)) != 0) {
+                    System.out.println("Duplicate number " + (intValue+1) + " in Sudoku at row: " + (i+1) + " and col: " + (j+1));
                     return false;
                 }
                 // Set bit to 1
-                // x = x | (1<<pos)
-                rows[i] = rows[i] | (1 << pos);
+                // x = x | (1<<intValue)
+                rows[i] = rows[i] | (1 << intValue);
 
-                if((cols[j] & (1 << pos)) != 0) {
+                if((cols[j] & (1 << intValue)) != 0) {
+                    System.out.println("Duplicate number " + (intValue+1) + " in Sudoku at row: " + (i+1) + " and col: " + (j+1));
                     return false;
                 }
-                cols[j] = cols[j] | (1 << pos);
+                cols[j] = cols[j] | (1 << intValue);
 
                 int boxIndex = (i/3)*3 + j/3;
-                if((boxes[boxIndex] & (1 << pos)) != 0) {
+                if((boxes[boxIndex] & (1 << intValue)) != 0) {
+                    System.out.println("Duplicate number " + (intValue+1) + " in Sudoku at row: " + (i+1) + " and col: " + (j+1));
                     return false;
                 }
-                boxes[boxIndex] = boxes[boxIndex] | (1 << pos);
+                boxes[boxIndex] = boxes[boxIndex] | (1 << intValue);
             }
         }
         return true;
@@ -55,7 +63,7 @@ public class SudokuValid_N_SpaceComplexity {
                         ,{'.','.','.','.','8','.','.','7','9'}};
 
         char [][] board2 =
-                        {{'8','3','.','.','7','.','.','.','.'}
+                        {{'7','0','.','.','7','.','.','.','.'}
                         ,{'6','.','.','1','9','5','.','.','.'}
                         ,{'.','9','8','.','.','.','.','6','.'}
                         ,{'8','.','.','.','6','.','.','.','3'}
@@ -65,7 +73,19 @@ public class SudokuValid_N_SpaceComplexity {
                         ,{'.','.','.','4','1','9','.','.','5'}
                         ,{'.','.','.','.','8','.','.','7','9'}};
 
-        System.out.println(isValidSudoku(board1)); // true
-        System.out.println(isValidSudoku(board2)); // false (8 twice in col 1)
+        char [][] board3 =
+                        {{'7','3','.','.','7','.','.','.','.'}
+                        ,{'6','.','.','1','9','5','.','.','.'}
+                        ,{'.','9','8','.','.','.','.','6','.'}
+                        ,{'8','.','.','.','6','.','.','.','3'}
+                        ,{'4','.','.','8','.','3','.','.','1'}
+                        ,{'7','.','.','.','2','.','.','.','6'}
+                        ,{'.','6','.','.','.','.','2','8','.'}
+                        ,{'.','.','.','4','1','9','.','.','5'}
+                        ,{'.','.','.','.','8','.','.','7','9'}};
+
+        System.out.println(isValidSudoku(board1) + "\n"); // true
+        System.out.println(isValidSudoku(board2) + "\n"); // false (0 present)
+        System.out.println(isValidSudoku(board3) + "\n"); // false (7 twice in row 1)
     }
 }

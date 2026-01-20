@@ -1,4 +1,4 @@
-package Interviews.Confluent_Dec25.DSA_Practice;;
+package Interviews.Confluent_Dec25.DSA_Practice;
 import java.util.*;
 
 /**
@@ -10,6 +10,9 @@ import java.util.*;
  * - get(key, timestamp) : O(1)
  * - getAverage(timestamp) : O(1)
  *
+ * Space complexity: O(n)
+ * n: number of active entries (same in DLL & Map)
+ *
  * Note: LinkedHashMap solves this already in Java
  */
 
@@ -17,69 +20,129 @@ import java.util.*;
  * For concurrent requests, requirement is for a strongly (or eventually) consistent system,
  *
  * Soln:
+ * Use ConcurrentHashMap. But need thread-safe DLL updates & runningSum/count updates.
+ * Use AtomicLong/AtomicInteger for runningSum/count for lock-free reads of aggregated statistics
+ *
+ *
+ *          Read heavy (Many get/getAverage calls)
+ *              Use ReentrantReadWriteLock: readers take shared lock; writers (put or eviction) take write lock.
+ *              But since we must evict on read (which mutates structure), reads are not purely read-only — they may cause eviction (writes).
+ *              To avoid this, separate the eviction process:
+ *                  Option A:
+ *                      do lazy eviction asynchronously by a background thread
+ *                      Slightly stale results
+ *                  Option B:
+ *                      maintain per-time buckets and atomic counters so getAverage can be lock-free (use atomic sum/count).
+ *
+ *         Write heavy (Many put calls)
+ *              ensure append/remove operations are cheap.
+ *              If lock contention is an issue, use sharded map and per-shard DLLs (consistent hashing on key).
+ *
+ * To balance concurrency and correctness: Use lock striping (shards)
+ *
+ *          Strongly consistent version
+ *              Single leader handles all writes, replicate sync to followers
+ *              Evictions happen deterministically by leader
+ *              All reads go through leader
+ *              getAverage() always accurate
+ *              For scale,
+ *                  partition keys across shards; use leader per shard
+ *                  Global getAverage would need aggregation across shards
+ *
+ *          Eventually consistent version
+ *              Each shard evicts locally, and replicates async
+ *              Aggregates getAverate() async
+ *              getAverage() may be slightly stale
+ *              Acceptable for monitoring / analytics
+ *
+ *
+ *          Practical large scale soln
+ *              Partition keys across shards
+ *              Maintain per-shard aggregates (sum/count)
+ *              For getAverage():
+ *                  If slightly stale is allowed,
+ *                      query each shard's local aggregate and compute average (fast).
+ *                      Optionally, maintain a streaming aggregator (e.g., Kafka Streams / Flink) that keeps a global aggregate updated.
+ *
+ *                  If strong consistency required,
+ *                      coordinate with leaders or read from a single leader that maintains authoritative state.
  */
 
 public class CacheTimeEviction {
     private final Map<String, Node> map;
     private Node head, tail; // oldest at head, latest at tail
-    private long runningSum; // sum of active values
+    private int runningSum; // sum of active values
     private int runningCount; // count of active entries
-    private final long windowSec; // window length in seconds
+    private final int windowSec; // window length in seconds
+    /*
+    nodeInsertionTimestamp = 3
+    windowSec = 5
+
+    queryTime = 7 : exists
+    queryTime = 8 : exists
+    queryTime = 9 : evicted
+     */
 
     private static class Node {
         final String key;
-        long value;
-        long timestamp; // insertion time
+        int value;
+        int timestamp; // insertion time
         Node prev, next;
 
-        Node(String key, long value, long timestamp) {
+        Node(String key, int value, int timestamp) {
             this.key = key;
             this.value = value;
             this.timestamp = timestamp;
         }
     }
 
-    public CacheTimeEviction(long windowSec) {
+    public CacheTimeEviction(int windowSec) {
         this.windowSec = windowSec;
         this.map = new HashMap<>();
-        this.head = this.tail = null;
-        this.runningSum = 0L;
+        this.runningSum = 0;
         this.runningCount = 0;
     }
 
     /** Evict expired entries using currentTimestamp. Amortized O(1) per removed entry. */
-    private void evictExpired(long currentTimestamp) {
-        long expiryCutoff = currentTimestamp - windowSec - 1; // strict: timestamps < expiryCutoff are expired
-        while (head != null && head.timestamp <= expiryCutoff) {
-            Node node = head;
-            removeNode(node);
-            map.remove(node.key);
-            runningSum -= node.value;
+    private void evictExpired(int currentTimestamp) {
+        int expiryCutoff = currentTimestamp - windowSec;
+        // strict: timestamps < expiryCutoff are evicted, timestamps >= expiryCutoff are allowed.
+        while (head != null && head.timestamp < expiryCutoff) {
+            map.remove(head.key);
+            runningSum -= head.value;
             runningCount--;
+            removeNode(head);
         }
     }
 
     /** Remove node from DLL (assumes node is present). O(1). */
     private void removeNode(Node node) {
-        if (node.prev != null) node.prev.next = node.next;
-        else head = node.next;
+        if (node.prev != null)
+            node.prev.next = node.next;
+        else
+            head = node.next;
 
-        if (node.next != null) node.next.prev = node.prev;
-        else tail = node.prev;
+        if (node.next != null)
+            node.next.prev = node.prev;
+        else
+            tail = node.prev;
 
         node.prev = node.next = null;
     }
 
     /** Append node to tail (as newest). O(1). */
     private void appendToTail(Node node) {
+        if (tail != null)
+            tail.next = node;
         node.prev = tail;
-        if (tail != null) tail.next = node;
         tail = node;
-        if (head == null) head = node;
+
+        if (head == null)
+            head = node;
     }
 
     /** Put (insert or update) key with value at given timestamp. Amortized O(1). */
-    public void put(String key, long value, long timestamp) {
+    public void put(String key, int value, int timestamp) {
         // step 1: evict expired entries using current timestamp
         evictExpired(timestamp);
 
@@ -108,19 +171,20 @@ public class CacheTimeEviction {
     }
 
     /** Get value if present and not expired; else return -1. */
-    public long get(String key, long timestamp) {
+    public long get(String key, int timestamp) {
         evictExpired(timestamp);
-        if (!map.containsKey(key)) {
+        if (!map.containsKey(key))
             return -1;
-        }
-        // present and active
+
         return map.get(key).value;
     }
 
     /** Return average of currently active values (as double). Returns 0.0 if none. */
-    public double getAverage(long timestamp) {
+    public double getAverage(int timestamp) {
         evictExpired(timestamp);
-        if (runningCount == 0) return 0.0;
+        if (runningCount == 0)
+            return 0.0;
+
         return (double) runningSum / runningCount;
     }
 

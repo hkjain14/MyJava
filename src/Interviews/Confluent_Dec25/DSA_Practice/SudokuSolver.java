@@ -3,8 +3,10 @@ package Interviews.Confluent_Dec25.DSA_Practice;
 /*
 https://leetcode.com/problems/sudoku-solver
 
-Time complexity: O((N!)^N) = (9!)^9
-    10^27 faster than brute force = 9^81
+Time complexity: O(N^E) = 9^E
+E = number of empty cells
+     faster than brute force = 9^81
+
 Space complexity: O(N^2) = 81
  */
 
@@ -83,9 +85,9 @@ public class SudokuSolver {
     void printBoard() {
         for (int i=0;i<N;i++) {
             for (int j=0;j<N;j++) {
-                System.out.printf((board[i][j] - '0') + " ");
+                System.out.print((board[i][j] - '0') + " ");
             }
-            System.out.println("");
+            System.out.println();
         }
     }
 
